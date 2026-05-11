@@ -1,3 +1,6 @@
+const { useMultiFileAuthState } = require('@whiskeysockets/baileys');
+// Ou si tu utilises les modules ES :
+// import { useMultiFileAuthState } from '@whiskeysockets/baileys';
 const {
 default: makeWASocket,
 useMultiFileAuthState
