@@ -1,77 +1,3 @@
-const { useMultiFileAuthState } = require('@whiskeysockets/baileys');
-// Ou si tu utilises les modules ES :
-// import { useMultiFileAuthState } from '@whiskeysockets/baileys';
-const {
-default: makeWASocket,
-useMultiFileAuthState
-} = require("@whiskeysockets/baileys")
-
-const P = require("pino")
-
-async function startBot() {
-
-const { state, saveCreds } =
-await useMultiFileAuthState("session")
-
-const sock = makeWASocket({
-auth: state,
-logger: P({ level: "silent" })
-})
-
-sock.ev.on("creds.update", saveCreds)
-
-
-// ================= CODE NUMÉRIQUE =================
-
-if (!sock.authState.creds.registered) {
-
-const phoneNumber = "221707243260"
-
-const code = await sock.requestPairingCode(phoneNumber)
-
-console.log(`
-========================
-CODE WHATSAPP :
-${code}
-========================
-`)
-}
-
-
-// ================= COMMANDES =================
-
-sock.ev.on("messages.upsert", async ({ messages }) => {
-
-const msg = messages[0]
-if (!msg.message) return
-
-const from = msg.key.remoteJid
-
-const text =
-msg.message.conversation ||
-msg.message.extendedTextMessage?.text || ""
-
-if (text === ".ping") {
-
-await sock.sendMessage(from, {
-text: "pong 🟢"
-})
-
-}
-
-if (text === ".menu") {
-
-await sock.sendMessage(from, {
-text:
-`🤖 kyoka suigetsu BOT
-
-.menu
-.ping`
-})
-
-}
-
-})
 const {
 default: makeWASocket,
 useMultiFileAuthState,
@@ -328,17 +254,6 @@ if(shouldReconnect) startBot()
 
 if(connection === "open") {
 console.log("👑 BOT CONNECTÉ")
-}
-
-})
-
-}
-
-startBot()
-sock.ev.on("connection.update", ({ connection }) => {
-
-if (connection === "open") {
-console.log("✅ Bot connecté")
 }
 
 })
