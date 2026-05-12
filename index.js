@@ -1,16 +1,19 @@
-const {
-default: makeWASocket,
-useMultiFileAuthState,
-DisconnectReason
-} = require("@whiskeysockets/baileys")
+if (!sock.authState.creds.registered) {
+const phoneNumber = "221707243260"
+const code = await sock.requestPairingCode(phoneNumber)
+console.log("CODE :", code)
+}
+const sock = makeWASocket({
+auth: state,
+printQRInTerminal: false
+})
+  const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason, makeCacheableSignalKeyStore, useMobileAuthState, requestPairingCode } = require("@whiskeysockets/baileys")
 
 const P = require("pino")
 
 //////////////////////////////////////////////////
 // 👑 CONFIG
 //////////////////////////////////////////////////
-
-const king = "221707243260@s.whatsapp.net"
 
 let activeQuiz = {}
 let scores = {}
