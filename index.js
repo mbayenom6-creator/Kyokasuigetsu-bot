@@ -1,4 +1,270 @@
+import makeWASocket, {
+DisconnectReason,
+useMultiFileAuthState,
+fetchLatestBaileysVersion
+} from '@whiskeysockets/baileys'
+
+import P from 'pino'
+import axios from 'axios'
+import fs from 'fs'
+
+const prefix = "."
+
+const owner = "221711454190"
+
+const antilink = true
+
+async function startBot() {
+
+const { state, saveCreds } =
+await useMultiFileAuthState('session')
+
+const { version } =
+await fetchLatestBaileysVersion()
+
+const sock = makeWASocket({
+version,
+logger: P({ level: 'silent' }),
+auth: state
+})
+
 if (!sock.authState.creds.registered) {
+
+const phoneNumber = "221711454190"
+
+const code =
+await sock.requestPairingCode(phoneNumber)
+
+console.log(`
+=================================
+CODE WHATSAPP :
+${code}
+=================================
+`)
+}
+
+sock.ev.on('creds.update', saveCreds)
+
+sock.ev.on('messages.upsert',
+async ({ messages }) => {
+
+const m = messages[0]
+
+if (!m.message) return
+
+const from = m.key.remoteJid
+
+const isGroup = from.endsWith('@g.us')
+
+const sender = m.key.participant || from
+
+const msg =
+m.message.conversation ||
+m.message.extendedTextMessage?.text ||
+""
+
+const command =
+msg.startsWith(prefix)
+? msg.slice(1).split(" ")[0]
+: ""
+
+const args = msg.split(" ").slice(1)
+
+console.log("[ MESSAGE ]", msg)
+
+
+// ANTI LINK
+
+if (
+antilink &&
+msg.includes("https://chat.whatsapp.com/")
+) {
+
+await sock.sendMessage(from, {
+text: "❌ LIEN INTERDIT"
+})
+
+}
+
+
+// MENU
+
+if (command === "menu") {
+
+await sock.sendMessage(from, {
+text: `
+╭━━〔 AIZEN BOT 〕━━⬣
+
+👑 OWNER
+.owner
+
+🤖 BOT
+.ping
+.alive
+.runtime
+
+🛡️ GROUPE
+.tagall
+.kick
+.promote
+.demote
+
+🎮 FUN
+.game
+.devine
+
+📥 DOWNLOAD
+.tt
+.yt
+
+🧠 IA
+.ai bonjour
+
+🖼️ STICKER
+.s
+
+⚙️ AUTRES
+.menu
+
+╰━━━━━━━━━━━━⬣
+`
+})
+
+}
+
+
+// PING
+
+if (command === "ping") {
+
+await sock.sendMessage(from, {
+text: "🏓 PONG"
+})
+
+}
+
+
+// ALIVE
+
+if (command === "alive") {
+
+await sock.sendMessage(from, {
+text: "✅ BOT ACTIF"
+})
+
+}
+
+
+// OWNER
+
+if (command === "owner") {
+
+await sock.sendMessage(from, {
+text: "👑 OWNER : AIZEN"
+})
+
+}
+
+
+// TAGALL
+
+if (command === "tagall" && isGroup) {
+
+const groupMetadata =
+await sock.groupMetadata(from)
+
+const participants =
+groupMetadata.participants
+
+let teks = "📢 TAG ALL\n\n"
+
+let mentions = []
+
+for (let p of participants) {
+
+teks += `@${p.id.split("@")[0]}\n`
+
+mentions.push(p.id)
+
+}
+
+await sock.sendMessage(from, {
+text: teks,
+mentions
+})
+
+}
+
+
+// GAME
+
+if (command === "game") {
+
+const games = [
+"🎯 Tu as gagné",
+"💀 Tu as perdu",
+"🔥 Jackpot",
+"😹 Essaye encore"
+]
+
+const result =
+games[Math.floor(Math.random() * games.length)]
+
+await sock.sendMessage(from, {
+text: result
+})
+
+}
+
+
+// IA SIMPLE
+
+if (command === "ai") {
+
+const question = args.join(" ")
+
+if (!question)
+return sock.sendMessage(from, {
+text: "Pose une question"
+})
+
+await sock.sendMessage(from, {
+text: `🤖 Réponse IA:\n\nTu as dit : ${question}`
+})
+
+}
+
+
+// STICKER
+
+if (command === "s") {
+
+await sock.sendMessage(from, {
+text: "🖼️ Fonction sticker ajoutée"
+})
+
+}
+
+
+// YOUTUBE
+
+if (command === "yt") {
+
+await sock.sendMessage(from, {
+text: "📥 Téléchargement YouTube bientôt disponible"
+})
+
+}
+
+
+// TIKTOK
+
+if (command === "tt") {
+
+await sock.sendMessage(from, {
+text: "📥 Téléchargement TikTok bientôt disponible"
+}
+  if (!sock.authState.creds.registered) {
 const phoneNumber = "221707243260"
 const code = await sock.requestPairingCode(phoneNumber)
 console.log("CODE :", code)
